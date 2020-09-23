@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import Highcharts, { getDeferredAnimation } from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 
-const SERVER = "http://192.168.0.192:5000";
+// const SERVER = "http://192.168.0.192:5000";
+const SERVER = "http://intercom.website:5000";
 
 const options = {
   chart: {
@@ -22,11 +23,11 @@ function App() {
   const [logEntries, setlogEntries] = useState();
   const [batches, setbatches] = useState();
   const [graphData, setgraphData] = useState(options);
-  var date = new Date("2020-09-20 16:37:41");
+  var date = new Date();
 
   console.log("Date: ", date.toLocaleString());
 
-  useEffect(() => {
+  const fetchLogEntries = () => {
     let URL = SERVER + "/logentries";
     fetch(URL, {
       method: "GET",
@@ -47,9 +48,16 @@ function App() {
       .catch((error) => {
         console.error("LogEntries Error:", error);
       });
-  }, [setlogEntries]);
+  };
 
   useEffect(() => {
+    fetchLogEntries();
+    setInterval(() => {
+      fetchLogEntries();
+    }, 300000);
+  }, []);
+
+  const fetchBatches = () => {
     let URL = SERVER + "/batches";
     fetch(URL, {
       method: "GET",
@@ -70,7 +78,10 @@ function App() {
       .catch((error) => {
         console.error("Batches Error:", error);
       });
-  }, [setlogEntries]);
+  };
+  useEffect(() => {
+    fetchBatches();
+  }, [setbatches]);
 
   useEffect(() => {
     if (batches?.length) {
@@ -78,30 +89,10 @@ function App() {
     }
   }, [batches]);
 
-  // export const getDailyXaxis = (): XAxisOptions => ({
-  //   title: {
-  //     text: null,
-  //   },
-  //   min: getOpeningDatetime(),
-  //   max: getClosingDatetime(),
-  //   type: "datetime",
-  //   //Sets tickInterval to 24 * 3600 * 1000 if display is by day
-  //   dateTimeLabelFormats: {
-  //     hour: "%H",
-  //   },
-  //   tickInterval: 1000 * 3600, // tick every hour
-  // });
-
-  // const getToday = () => Date.now().startOf("day");
-  // const getOpeningDatetime = (hours: number = 8, minutes: number = 30) =>
-  //   getToday().set("hour", hours).set("minute", minutes).valueOf();
-  // const getClosingDatetime = (hours: number = 17) =>
-  //   getToday().set("hour", hours).valueOf();
-
   const getStartDate = () => {
     let d = new Date();
     d.setDate(d.getDate() - 1);
-    d.setTime(d.getTime() + 2 * 60 * 60 * 1000);
+    //d.setTime(d.getTime() + 2 * 60 * 60 * 1000);
     console.log("getStartDate ", d.getTime());
     let d2 = new Date();
     console.log("Timenow: ", d2.getTime());
